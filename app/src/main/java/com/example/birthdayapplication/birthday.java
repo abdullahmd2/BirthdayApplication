@@ -5,19 +5,18 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.FileProvider;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,7 +24,6 @@ import java.util.Calendar;
 
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
-import static android.content.Intent.normalizeMimeType;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 public class birthday extends AppCompatActivity {
@@ -61,7 +59,7 @@ public class birthday extends AppCompatActivity {
                 sharebtn.setVisibility(View.INVISIBLE);
 
 //                View vi = rl;
-                takeScreenshot(rl, "Capture", birthday.this);
+                takeScreenshot(rl, "Capture");
 
                 // Making button visible again after taking screenshot
                 sharebtn.setVisibility(View.VISIBLE);
@@ -69,7 +67,7 @@ public class birthday extends AppCompatActivity {
         });
     }
 
-    public File takeScreenshot(View view, String fileName, Context context) {
+    public File takeScreenshot(View view, String fileName) {
         try {
             String dirPath = Environment.getExternalStorageDirectory() + "/DCIM/Screenshots";
             File file = new File(dirPath);
@@ -88,20 +86,18 @@ public class birthday extends AppCompatActivity {
             fos.flush();
             fos.close();
 
-            Intent intent = new Intent(Intent.ACTION_VIEW);
-            intent.setFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            Intent intent = new Intent(Intent.ACTION_SEND);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             Uri uri = FileProvider.getUriForFile(getApplicationContext(), BuildConfig.APPLICATION_ID + ".provider", imageurl);
-            intent.setDataAndType(uri, "image/jpeg");
+            intent.putExtra(Intent.EXTRA_STREAM,uri);
+            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+            intent.setType("image/jpeg");
 
-            PackageManager pm = getPackageManager();
-            if (intent.resolveActivity(pm) != null)
-                startActivity(Intent.createChooser(intent,"Open via"));
-            else
-                Log.d("Error", "Cannot start intent");
+            startActivity(Intent.createChooser(intent,"Open via"));
 
             return imageurl;
         } catch (Exception e) {
-            Log.d("Error", "There is an error" + e);
+            Toast.makeText(this, "Something went wrong.", Toast.LENGTH_SHORT).show();
         }
 
         return null;
