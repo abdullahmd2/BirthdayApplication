@@ -2,6 +2,7 @@ package com.example.birthdayapplication;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.FileProvider;
 
 import android.app.Activity;
 import android.content.ContentResolver;
@@ -62,8 +63,7 @@ public class birthday extends AppCompatActivity {
                 // Making button invisible so that it don't appear in the screenshot
                 sharebtn.setVisibility(View.INVISIBLE);
 
-//                View vi = rl;
-                takeScreenshot(rl, "Capture");
+                takeScreenshot(rl);
 
                 // Making button visible again after taking screenshot
                 sharebtn.setVisibility(View.VISIBLE);
@@ -71,55 +71,64 @@ public class birthday extends AppCompatActivity {
         });
     }
 
-    public void takeScreenshot(View view, String fileName) {
+    public void takeScreenshot(View view) {
         try {
-//            String dirPath = Environment.getExternalStorageDirectory() + "/DCIM/Screenshots";
-//            File file = new File(dirPath);
-//            if (!file.exists())
-//                file.mkdir();
-//
-//            String filePath = dirPath + "/" + fileName + " - " + Calendar.getInstance().getTime().toString() + ".jpeg";
-
             view.setDrawingCacheEnabled(true);
             Bitmap bitmap = Bitmap.createBitmap(view.getDrawingCache());
             view.setDrawingCacheEnabled(false);
 
-//            File imageurl = new File(filePath);
-
-            OutputStream fos;
+            OutputStream os;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 ContentResolver resolver = getContentResolver();
                 ContentValues values = new ContentValues();
-                values.put(MediaStore.MediaColumns.DISPLAY_NAME, "Image " + System.currentTimeMillis() + ".jpg");
+                values.put(MediaStore.MediaColumns.DISPLAY_NAME, "Wish " + System.currentTimeMillis() + ".jpg");
                 values.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
-                values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + File.separator + "TestFolder");
+                values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + File.separator + "Birthday Wisher");
                 Uri imageUrl = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-                fos = (FileOutputStream) resolver.openOutputStream(Objects.requireNonNull(imageUrl));
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
-                Objects.requireNonNull(fos);
+                os = (FileOutputStream) resolver.openOutputStream(Objects.requireNonNull(imageUrl));
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
+                Objects.requireNonNull(os);
 
                 Toast.makeText(this, "Image Saved", Toast.LENGTH_SHORT).show();
 
-//                bitmap.compress(Bitmap.CompressFormat.JPEG, 85, fos);
-//                fos.flush();
-//                fos.close();
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//                Uri uri = FileProvider.getUriForFile(getApplicationContext(), BuildConfig.APPLICATION_ID + ".provider", imageUrl);
+                intent.putExtra(Intent.EXTRA_STREAM, imageUrl);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                intent.setType("image/jpeg");
+
+                startActivity(Intent.createChooser(intent, "Share via"));
+
+            } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                String dirPath = Environment.getExternalStorageDirectory() + "/DCIM/Screenshots";
+                File file = new File(dirPath);
+                if (!file.exists())
+                    file.mkdir();
+
+                String filePath = dirPath + "/" + "Wish " + System.currentTimeMillis() + ".jpeg";
+
+                File imageurl = new File(filePath);
+
+                FileOutputStream fos = new FileOutputStream(imageurl);
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+                fos.flush();
+                fos.close();
+
+                Toast.makeText(this, "Image save to\n" + dirPath, Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(Intent.ACTION_SEND);
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                Uri uri = FileProvider.getUriForFile(getApplicationContext(), BuildConfig.APPLICATION_ID + ".provider", imageurl);
+                intent.putExtra(Intent.EXTRA_STREAM, uri);
+                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                intent.setType("image/jpeg");
+
+                startActivity(Intent.createChooser(intent, "Share via"));
             }
-
-//            Intent intent = new Intent(Intent.ACTION_SEND);
-//            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//            Uri uri = FileProvider.getUriForFile(getApplicationContext(), BuildConfig.APPLICATION_ID + ".provider", imageurl);
-//            intent.putExtra(Intent.EXTRA_STREAM, uri);
-//            intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-//            intent.setType("image/jpeg");
-//
-//            startActivity(Intent.createChooser(intent, "Open via"));
-
-//            return imageurl;
         } catch (Exception e) {
             Toast.makeText(this, "Something went wrong.", Toast.LENGTH_SHORT).show();
         }
-
-//        return null;
     }
 
     public static void verifystoragepermissions(Activity activity) {
