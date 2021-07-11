@@ -1,3 +1,2 @@
 # Birthday Application
-![Screenshot_20210512_210803](https://user-images.githubusercontent.com/69393792/118003469-3c9eac80-b366-11eb-8916-9f21fddb7f35.png)
-![Screenshot_20210512_210812](https://user-images.githubusercontent.com/69393792/118003473-3e687000-b366-11eb-906d-e730924dc22e.png)
+![Screenshot_20210525_201013](https://user-images.githubusercontent.com/69393792/119518289-03b6fc80-bd96-11eb-9825-bec1028a4b0f.png)![Screenshot_20210525_201108](https://user-images.githubusercontent.com/69393792/119518313-09144700-bd96-11eb-9ed9-a6a8c60d1314.png)
