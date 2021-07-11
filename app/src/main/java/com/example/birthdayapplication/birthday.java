@@ -38,7 +38,7 @@ public class birthday extends AppCompatActivity {
     ImageButton sharebtn;
     RelativeLayout rl;
     private static final int REQUEST_EXTERNAL_STORAGe = 1;
-    private static String[] permissionstorage = {WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE};
+    private static final String[] permissionstorage = {WRITE_EXTERNAL_STORAGE, READ_EXTERNAL_STORAGE};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,23 +51,20 @@ public class birthday extends AppCompatActivity {
         mText = findViewById(R.id.text);
         String value = getIntent().getStringExtra("birthday name");
         mText.setText("Happy Birthday\n" + value);
-        imageView = (ImageView) findViewById(R.id.card);
-        rl = (RelativeLayout) findViewById(R.id.rl);
-        sharebtn = (ImageButton) findViewById(R.id.sharebtn);
+        imageView = findViewById(R.id.card);
+        rl = findViewById(R.id.rl);
+        sharebtn = findViewById(R.id.sharebtn);
 
         verifystoragepermissions(this);
 
-        sharebtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Making button invisible so that it don't appear in the screenshot
-                sharebtn.setVisibility(View.INVISIBLE);
+        sharebtn.setOnClickListener(v -> {
+            // Making button invisible so that it don't appear in the screenshot
+            sharebtn.setVisibility(View.INVISIBLE);
 
-                takeScreenshot(rl);
+            takeScreenshot(rl);
 
-                // Making button visible again after taking screenshot
-                sharebtn.setVisibility(View.VISIBLE);
-            }
+            // Making button visible again after taking screenshot
+            sharebtn.setVisibility(View.VISIBLE);
         });
     }
 
@@ -85,7 +82,7 @@ public class birthday extends AppCompatActivity {
                 values.put(MediaStore.MediaColumns.MIME_TYPE, "image/jpeg");
                 values.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + File.separator + "Birthday Wisher");
                 Uri imageUrl = resolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, values);
-                os = (FileOutputStream) resolver.openOutputStream(Objects.requireNonNull(imageUrl));
+                os = resolver.openOutputStream(Objects.requireNonNull(imageUrl));
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, os);
                 Objects.requireNonNull(os);
 
@@ -93,7 +90,6 @@ public class birthday extends AppCompatActivity {
 
                 Intent intent = new Intent(Intent.ACTION_SEND);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//                Uri uri = FileProvider.getUriForFile(getApplicationContext(), BuildConfig.APPLICATION_ID + ".provider", imageUrl);
                 intent.putExtra(Intent.EXTRA_STREAM, imageUrl);
                 intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
                 intent.setType("image/jpeg");
